@@ -1,0 +1,82 @@
+
+##Course Project - Practical Machine Learning
+
+Load libraries and data
+
+```{r, echo=FALSE}
+library(caret)
+library(kernlab)
+library(ggplot2)
+
+# load data
+loaddata = read.csv("pml-training.csv") 
+```
+
+
+Due to time constrains, I selected only the variables containing the substring "dumbell" and the "classe" variable. For more accuracy, one should probably also use the names of the subjects on the study, but these would have to be converted to numbers. If I had more time, I would include the names.
+
+
+```{r, echo=FALSE}
+# selecting columns
+good <- c("roll_dumbbell","pitch_dumbbell","yaw_dumbbell",
+          "total_accel_dumbbell","gyros_dumbbell_x","gyros_dumbbell_y",
+          "gyros_dumbbell_z","accel_dumbbell_x","accel_dumbbell_y",
+          "accel_dumbbell_z","magnet_dumbbell_x","magnet_dumbbell_y",
+          "magnet_dumbbell_z","classe")
+data <- loaddata[,good]
+````
+
+
+For a 4-fold cross validation I split the whole training data set into 4 subsets by assigning random variables from 1 to 4 to single measurements. I use one subset at a time as the testing set and the other tree as the training set.
+
+
+```{r, echo=FALSE}
+
+len <- length(data$classe)
+rint <- sample(1:4, len, replace=T)
+
+test1 = which(rint %in% c(1))
+test2 = which(rint %in% c(2))
+test3 = which(rint %in% c(3))
+test4 = which(rint %in% c(4))
+```
+
+```{r, echo=TRUE}
+training <- data[-test1,]
+testing  <- data[test1,]
+set.seed(32343)
+modelFit <- train(training[,1:13],training[,14],method="knn")
+predictions <- predict(modelFit,newdata=testing[,1:13])
+confusionMatrix(predictions,testing$classe)
+
+
+training <- data[-test2,]
+testing  <- data[test2,]
+set.seed(32343)
+modelFit <- train(training[,1:13],training[,14],method="knn")
+predictions <- predict(modelFit,newdata=testing[,1:13])
+confusionMatrix(predictions,testing$classe)
+
+
+training <- data[-test3,]
+testing  <- data[test3,]
+set.seed(32343)
+modelFit <- train(training[,1:13],training[,14],method="knn")
+predictions <- predict(modelFit,newdata=testing[,1:13])
+confusionMatrix(predictions,testing$classe)
+
+
+training <- data[-test4,]
+testing  <- data[test4,]
+set.seed(32343)
+modelFit <- train(training[,1:13],training[,14],method="knn")
+predictions <- predict(modelFit,newdata=testing[,1:13])
+confusionMatrix(predictions,testing$classe)
+
+```
+
+From the confusion matrix one can see, that the accuracy is around 80%, thus the in sample error is about 20%. For the out of sample error, this is a very optimistic value. I would guess, that the out of sample accuracy is at least 5% higher.
+
+
+
+
